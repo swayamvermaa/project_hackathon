@@ -1,0 +1,41 @@
+CREATE DATABASE IF NOT EXISTS waste_marketplace;
+
+USE waste_marketplace;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    password VARCHAR(50),
+    role ENUM('buyer', 'seller'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    seller_id INT,
+    product_name VARCHAR(100),
+    product_description TEXT,
+    price DECIMAL(10, 2),
+    quantity INT,
+    category VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES users(id)
+);
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    buyer_id INT,
+    product_id INT,
+    quantity INT,
+    total_price DECIMAL(10, 2),
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'Pending',
+    FOREIGN KEY (buyer_id) REFERENCES users(id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+CREATE TABLE transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    payment_status VARCHAR(50),
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    amount DECIMAL(10, 2),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
