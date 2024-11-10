@@ -11,17 +11,23 @@ DB_CONFIG = {
     'password': 'vermaswayam@225346',
     'database': 'waste_marketplace'
 }
-# Updated Color Scheme
-PRIMARY_COLOR = "#2c3e50"  # Midnight Blue
+PRIMARY_COLOR = "#1abc9c"  # Turquoise
 SECONDARY_COLOR = "#ecf0f1"  # Light Grey
-BTN_PRIMARY_COLOR = "#e67e22"  # Carrot Orange
+BTN_PRIMARY_COLOR = "#e74c3c"  # Alizarin Red
 BTN_SECONDARY_COLOR = "#3498db"  # Peter River
-HIGHLIGHT_COLOR = "#1abc9c"  # Turquoise for accents
-TEXT_COLOR = "#34495e"  # Wet Asphalt
-
 FONT_LARGE = ("Arial", 18, "bold")
 FONT_MEDIUM = ("Arial", 14)
 FONT_SMALL = ("Arial", 12)
+HIGHLIGHT_COLOR = "#f39c12"  # Yellow
+TEXT_COLOR = "#2c3e50"  # Dark Grey
+
+# Constants for text messages
+WELCOME_MESSAGE = "Welcome to Waste Marketplace!"
+TAGLINE = "Connecting Buyers & Sellers of Reusable Materials"
+INSTRUCTIONS = "Sign in to your account or register as a new user to get started!"
+LOGIN_PROMPT = "Login to access the best deals on reusable products."
+SIGNUP_PROMPT = "Create a new account to buy and sell waste products effortlessly."
+ENTER_DETAILS = "Please Enter Your Details Below"
 
 # Database Connection
 def connect_db():
@@ -84,6 +90,7 @@ def signup_user():
     except mysql.connector.Error as e:
         messagebox.showerror("Error", "Username already exists!" if e.errno == 1062 else str(e))
 
+
 def switch_to_signup():
     btn_action.config(text="Sign Up", command=signup_user)
     switch_label.config(text="Already have an account? Login")
@@ -107,7 +114,7 @@ def open_seller_dashboard():
 
 # Buyer Dashboard Functions
 def display_product_list(window):
-    tk.Label(window, text="Available Products", font=FONT_LARGE, fg=HIGHLIGHT_COLOR).pack(pady=20)
+    tk.Label(window, text="Available Products", font=FONT_LARGE).pack(pady=20)
     product_list = tk.Listbox(window, width=50)
 
     cursor.execute("SELECT product_id, product_name, price, quantity FROM products WHERE quantity > 0")
@@ -117,7 +124,7 @@ def display_product_list(window):
     product_list.pack(pady=10)
 
 def setup_order_section(window):
-    tk.Label(window, text="Select Product ID and Quantity to Buy", font=FONT_SMALL, fg=TEXT_COLOR).pack(pady=5)
+    tk.Label(window, text="Select Product ID and Quantity to Buy", font=FONT_SMALL).pack(pady=5)
     entry_product_id = tk.Entry(window)
     entry_quantity = tk.Entry(window)
 
@@ -141,14 +148,14 @@ def setup_order_section(window):
         else:
             messagebox.showerror("Error", "Invalid product or quantity")
 
-    tk.Button(window, text="Place Order", command=place_order, bg=BTN_PRIMARY_COLOR, fg="white", font=FONT_SMALL).pack(pady=10)
+    tk.Button(window, text="Place Order", command=place_order).pack(pady=10)
 
 # Seller Dashboard Functions
 def setup_add_product_section(window):
-    tk.Label(window, text="Add Product", font=FONT_LARGE, fg=HIGHLIGHT_COLOR).pack(pady=20)
+    tk.Label(window, text="Add Product", font=FONT_LARGE).pack(pady=20)
     fields = {"Product Name": None, "Description": None, "Price": None, "Quantity": None}
     for label, entry in fields.items():
-        tk.Label(window, text=label, fg=TEXT_COLOR).pack(pady=5)
+        tk.Label(window, text=label).pack(pady=5)
         fields[label] = tk.Entry(window)
         fields[label].pack(pady=5)
 
@@ -167,27 +174,27 @@ def setup_add_product_section(window):
         except mysql.connector.Error as e:
             messagebox.showerror("Database Error", str(e))
 
-    tk.Button(window, text="Add Product", command=add_product, bg=BTN_PRIMARY_COLOR, fg="white", font=FONT_SMALL).pack(pady=20)
+    tk.Button(window, text="Add Product", command=add_product).pack(pady=20)
 
 def display_orders_section(window):
-    tk.Label(window, text="Your Orders", font=FONT_LARGE, fg=HIGHLIGHT_COLOR).pack(pady=20)
+    tk.Label(window, text="Your Orders", font=FONT_LARGE).pack(pady=20)
     cursor.execute(
         "SELECT orders.order_id, products.product_name, orders.quantity, orders.total_price, orders.status "
         "FROM orders JOIN products ON orders.product_id = products.product_id "
         "WHERE products.seller_id = %s", (logged_in_user[0],)
     )
     for order in cursor.fetchall():
-        tk.Label(window, text=f"Order {order[0]}: {order[1]} - {order[2]} pcs - ${order[3]} - Status: {order[4]}", fg=TEXT_COLOR).pack()
+        tk.Label(window, text=f"Order {order[0]}: {order[1]} - {order[2]} pcs - ${order[3]} - Status: {order[4]}").pack()
 
 # Helper Functions
 def create_window(title):
     window = tk.Toplevel()
     window.title(title)
     window.geometry("800x500")
-    window.configure(bg=SECONDARY_COLOR)
+    window.resizable(True, True)  # Make window resizable
     return window
 
-# Event Handlers for Placeholder Text
+# Placeholder handling functions
 def on_username_focus_in(event):
     if entry_username.get() == "Enter your email":
         entry_username.delete(0, tk.END)
@@ -211,46 +218,52 @@ def on_password_focus_out(event):
 # Main Window Setup
 window = tk.Tk()
 window.title("Waste Products Marketplace")
-window.geometry("800x500")
+window.geometry("1000x600")
 window.configure(bg=SECONDARY_COLOR)
 
-# Layout - Left Panel
-left_frame = tk.Frame(window, bg=PRIMARY_COLOR, width=300)
-left_frame.pack(side="left", fill="y")
-tk.Label(left_frame, text="Welcome to Waste Marketplace", font=FONT_LARGE, bg=PRIMARY_COLOR, fg="white").place(x=20, y=50)
-tk.Label(left_frame, text="Buy & Sell Waste Products Easily", font=FONT_MEDIUM, bg=PRIMARY_COLOR, fg="white").place(x=20, y=100)
+# Layout - Left Panel with Attractive Text
+left_frame = tk.Frame(window, bg=PRIMARY_COLOR, width=350, padx=30, pady=40)
+left_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
 
-# Layout - Right Panel
-right_frame = tk.Frame(window, bg=SECONDARY_COLOR)
-right_frame.pack(side="right", expand=True, fill="both", padx=40, pady=40)
+tk.Label(left_frame, text=WELCOME_MESSAGE, font=FONT_LARGE, bg=PRIMARY_COLOR, fg="white").grid(row=0, column=0, pady=20)
+tk.Label(left_frame, text=TAGLINE, font=FONT_SMALL, bg=PRIMARY_COLOR, fg="white", wraplength=280).grid(row=1, column=0, pady=10)
+tk.Label(left_frame, text=INSTRUCTIONS, font=FONT_SMALL, bg=PRIMARY_COLOR, fg="white", wraplength=280).grid(row=2, column=0, pady=20)
 
-tk.Label(right_frame, text="Enter the Details", font=FONT_LARGE, bg=SECONDARY_COLOR, fg=HIGHLIGHT_COLOR).pack(pady=20)
-entry_username, entry_password = tk.Entry(right_frame, font=FONT_MEDIUM, fg="grey"), tk.Entry(right_frame, font=FONT_MEDIUM, fg="grey", show="")
+# Layout - Right Panel with Attractive Text and Forms
+right_frame = tk.Frame(window, bg=SECONDARY_COLOR, padx=40, pady=40)
+right_frame.grid(row=0, column=1, rowspan=2, sticky="nsew")
+
+tk.Label(right_frame, text=ENTER_DETAILS, font=FONT_LARGE, bg=SECONDARY_COLOR, fg=HIGHLIGHT_COLOR).pack(pady=20)
+entry_username = tk.Entry(right_frame, font=FONT_MEDIUM, fg="grey")
+entry_password = tk.Entry(right_frame, font=FONT_MEDIUM, fg="grey", show="")
+
 entry_username.insert(0, "Enter your email")
 entry_password.insert(0, "Password")
 
-# Bind focus events
 entry_username.bind("<FocusIn>", on_username_focus_in)
 entry_username.bind("<FocusOut>", on_username_focus_out)
 entry_password.bind("<FocusIn>", on_password_focus_in)
 entry_password.bind("<FocusOut>", on_password_focus_out)
 
-entry_username.pack(pady=10, ipadx=20, ipady=8)
-entry_password.pack(pady=10, ipadx=20, ipady=8)
+entry_username.pack(pady=10, ipadx=20, ipady=8, fill="x")
+entry_password.pack(pady=10, ipadx=20, ipady=8, fill="x")
 
+# Role Selection
 role_var = tk.StringVar(value="buyer")
 tk.Label(right_frame, text="Role:", font=FONT_SMALL, bg=SECONDARY_COLOR, fg=TEXT_COLOR).pack(anchor="w", pady=5)
-ttk.Radiobutton(right_frame, text="Buyer", variable=role_var, value="buyer", bg=SECONDARY_COLOR).pack(anchor="w")
-ttk.Radiobutton(right_frame, text="Seller", variable=role_var, value="seller", bg=SECONDARY_COLOR).pack(anchor="w")
+ttk.Radiobutton(right_frame, text="Buyer", variable=role_var, value="buyer", style="TRadiobutton").pack(anchor="w")
+ttk.Radiobutton(right_frame, text="Seller", variable=role_var, value="seller", style="TRadiobutton").pack(anchor="w")
 
+# Login/Signup Action Button
 btn_action = tk.Button(right_frame, text="Login", command=login_user, font=FONT_MEDIUM, bg=BTN_PRIMARY_COLOR, fg="white")
 btn_action.pack(pady=20, ipadx=20, ipady=10)
-switch_label = tk.Label(right_frame, text="Don't have an account? Sign Up", bg=SECONDARY_COLOR, font=FONT_SMALL, fg=TEXT_COLOR)
+
+# Switch between Login and Signup with Informative Text
+switch_label = tk.Label(right_frame, text=LOGIN_PROMPT, bg=SECONDARY_COLOR, font=FONT_SMALL, fg=TEXT_COLOR)
 switch_button = tk.Button(right_frame, text="Sign Up", command=switch_to_signup, font=FONT_SMALL, bg=BTN_SECONDARY_COLOR, fg="white")
 switch_label.pack()
 switch_button.pack()
 
-# Run Main Loop
 window.mainloop()
 if conn:
     conn.close()
